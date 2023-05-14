@@ -1,8 +1,9 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
+	"io"
+	"log"
 	"net"
 	"os"
 	// Uncomment this block to pass the first stage
@@ -29,16 +30,19 @@ func main() {
 			os.Exit(1)
 		}
 
-		for {
-			var data []byte
-			conn.Read(data)
+		data := make([]byte, 1024)
 
-			var buf bytes.Buffer
-			buf.Write(data)
-			myData := buf.String()
-			if myData != "" {
-				fmt.Println(buf.String())
+		for {
+			if _, err := conn.Read(data); err != nil {
+				if err == io.EOF {
+					break
+				} else {
+					log.Fatalln("Error reading from command line", err)
+					os.Exit(1)
+				}
 			}
+
+			fmt.Println("data", string(data))
 
 			resp := "+PONG\r\n"
 			conn.Write([]byte(resp))
