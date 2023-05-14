@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"net"
 	"os"
@@ -28,10 +29,20 @@ func main() {
 			os.Exit(1)
 		}
 
-		var data []byte
+		for {
+			var data []byte
+			conn.Read(data)
 
-		conn.Read(data)
-		resp := fmt.Sprintf("+PONG\r\n")
-		conn.Write([]byte(resp))
+			var buf bytes.Buffer
+			buf.Write(data)
+			myData := buf.String()
+			if myData != "" {
+				fmt.Println(buf.String())
+			}
+
+			resp := "+PONG\r\n"
+			conn.Write([]byte(resp))
+		}
+
 	}
 }
